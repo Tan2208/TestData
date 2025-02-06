@@ -18,7 +18,6 @@ public class User {
     private String firstname;
     private LocalDate dob;
 
-
     public String getId() {
         return id;
     }
@@ -67,3 +66,7 @@ public class User {
         this.dob = dob;
     }
 }
+
+
+
+

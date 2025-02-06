@@ -4,8 +4,12 @@ import com.example.TestData.dto.request.ApiResponse;
 import com.example.TestData.dto.request.UserCreationRequest;
 import com.example.TestData.dto.request.UserUpdateRequest;
 import com.example.TestData.entity.User;
+import com.example.TestData.repository.UserRepository;
 import com.example.TestData.service.UserService;
 import jakarta.validation.Valid;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -14,9 +18,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserController {
-    @Autowired
-    private UserService userService;
+    UserService userService;
 
     @PostMapping
     ApiResponse<User> createUser(@RequestBody @Valid UserCreationRequest request)
@@ -36,7 +41,7 @@ public class UserController {
         return userService.getUser(userId);
     }
     @PutMapping("/{userId}")
-    User updateUser(@PathVariable String userId, @RequestBody UserUpdateRequest request) {
+    UserRepository updateUser(@PathVariable String userId, @RequestBody UserUpdateRequest request) {
         return userService.updateUser(userId, request);
     }
 
