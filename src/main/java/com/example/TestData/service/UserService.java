@@ -1,5 +1,7 @@
 package com.example.TestData.service;
 
+import com.example.TestData.Exception.AppException;
+import com.example.TestData.Exception.ErrorCode;
 import com.example.TestData.dto.request.UserCreationRequest;
 import com.example.TestData.dto.request.UserUpdateRequest;
 import com.example.TestData.entity.User;
@@ -18,7 +20,7 @@ public class UserService {
         User user = new User();
 
         if(userRepository.existsByUsername(request.getUsername())){
-            throw new RuntimeException("Username already exists");
+            throw new AppException(ErrorCode.USER_EXISTED);
         }
 
         user.setUsername(request.getUsername());
