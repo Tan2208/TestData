@@ -4,18 +4,21 @@ import com.example.TestData.Exception.AppException;
 import com.example.TestData.Exception.ErrorCode;
 import com.example.TestData.dto.request.UserCreationRequest;
 import com.example.TestData.dto.request.UserUpdateRequest;
-import com.example.TestData.dto.response.UserResponse;
+
 import com.example.TestData.entity.User;
+import com.example.TestData.enums.Role;
 import com.example.TestData.mapper.UserMapper;
 import com.example.TestData.repository.UserRepository;
 import lombok.AccessLevel;
+
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -26,6 +29,7 @@ public class UserService {
 
     UserRepository userRepository;
     UserMapper userMapper;
+    PasswordEncoder passwordEncoder;
 
     public User createRequest(UserCreationRequest request){
         //User user = new User();
@@ -34,8 +38,12 @@ public class UserService {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
         User user = userMapper.toUser(request);
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        HashSet<String> roles = new HashSet<>();
+        roles.add(Role.USER.name());
+
+        user.setRoles(roles);
 
         return userRepository.save(user);
     }
