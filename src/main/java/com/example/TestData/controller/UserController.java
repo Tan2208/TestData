@@ -3,6 +3,7 @@ package com.example.TestData.controller;
 import com.example.TestData.dto.request.ApiResponse;
 import com.example.TestData.dto.request.UserCreationRequest;
 import com.example.TestData.dto.request.UserUpdateRequest;
+import com.example.TestData.dto.response.UserResponse;
 import com.example.TestData.entity.User;
 import com.example.TestData.repository.UserRepository;
 import com.example.TestData.service.UserService;
@@ -34,20 +35,33 @@ public class UserController {
         return apiResponse;
     }
 
+
     @GetMapping
-    List<User> getUsers() {
+    ApiResponse<List<UserResponse>> getUsers() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
 
         log.info("Username= {}",authentication.getName());
         authentication.getAuthorities().forEach(grantedAuthority -> log.info(grantedAuthority.getAuthority()));
 
-        return userService.getUser();
+        return ApiResponse.<List<UserResponse>>builder()
+                .result(userService.getUser())
+                .build();
     }
 
     @GetMapping("/{userId}")
-    User getUser(@PathVariable("userId") String userId) {
-        return userService.getUser(userId);
+    ApiResponse<UserResponse> getUser(@PathVariable("userId") String userId) {
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.getUser(userId))
+                .build();
     }
+
+    @GetMapping("/myInfo")
+    ApiResponse<UserResponse> getMyInfo() {
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.getMyInfo())
+                .build();
+    }
+
     @PutMapping("/{userId}")
     UserRepository updateUser(@PathVariable String userId, @RequestBody UserUpdateRequest request) {
         return userService.updateUser(userId, request);

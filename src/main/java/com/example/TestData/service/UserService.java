@@ -5,6 +5,7 @@ import com.example.TestData.Exception.ErrorCode;
 import com.example.TestData.dto.request.UserCreationRequest;
 import com.example.TestData.dto.request.UserUpdateRequest;
 
+import com.example.TestData.dto.response.UserResponse;
 import com.example.TestData.entity.User;
 import com.example.TestData.enums.Role;
 import com.example.TestData.mapper.UserMapper;
@@ -14,16 +15,22 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
 public class UserService {
 
 
@@ -48,11 +55,27 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public List<User> getUser(){
-        return userRepository.findAll();
+    public UserResponse getMyInfo(){
+        var context = SecurityContextHolder.getContext();
+        String name = context.getAuthentication().getName();
+
+        User user  = userRepository.findByUsername(name)
+                .orElseThrow(()-> new AppException(ErrorCode.USER_NOT_EXISTED));
+        return userMapper.toUserResponse(user);
     }
-    public User getUser(String id){
-        return userRepository.findById(id).orElseThrow(()->new RuntimeException("User Not Found"));
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<UserResponse> getUser(){
+        log.info("In method get Users");
+        return userRepository.findAll().stream()
+                .map(userMapper::toUserResponse).toList();
+    }
+
+    @PostAuthorize("returnObject.username==authentication.name")
+    public UserResponse getUser(String id){
+        log.info("In method get Users by Id");
+        return userMapper.toUserResponse(userRepository.findById(id).orElseThrow(()->new AppException(ErrorCode.USER_NOT_EXISTED)))
+               ;
     }
 
     public UserRepository updateUser(String userId, UserUpdateRequest request){
