@@ -1,5 +1,7 @@
 package com.example.TestData.Exception;
 
+
+
 public class AppException extends RuntimeException {
 
     public AppException(ErrorCode errorCode) {
